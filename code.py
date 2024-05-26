@@ -153,7 +153,6 @@ class SolveTSPUsingACO:
         for i in range(self.num_nodes2):
             self.edges2[tour2[i]][tour2[(i + 1) % self.num_nodes2]].pheromone2 += weight2 * pheromone_to_add2 
 
-    # 变异操作
     def mutate_list(self, lst):
         # 
         index1 = random.randint(0, len(lst) - 1)
@@ -161,32 +160,31 @@ class SolveTSPUsingACO:
         lst[index1], lst[index2] = lst[index2], lst[index1]
         return lst
 
-    # 交叉操作(相同维度)
+   
     def order_crossover(self, parent1, parent2): 
-        # 随机生成交叉起点和交叉终点
+       
         start = random.randint(0, len(parent1) - 2)
         end = random.randint(start + 1, len(parent1) - 1)
-        # 从第一个父代中复制交叉区间
+       
         child1 = parent1[start:end + 1]
-        # 从第二个父代中按顺序填充剩余位置
+     
         for city in parent2:
             if city not in child1:
                 child1.append(city)
-        # child1 = order_crossover(parent1, parent2) 调用
-        # 返回子代个体
+       
         return child1
 
-    # 交叉操作(不同维度得到低维)
-    def order_crossover_low(self, parent1, parent2):  # 顺序交叉法（Order Crossover，OX）
-        # 随机生成交叉起点和交叉终点
+   
+    def order_crossover_low(self, parent1, parent2):  
+       
         start = random.randint(0, len(parent1) - 2)
         end = random.randint(start + 1, len(parent1) - 1)
 
-        # 从第一个父代中复制交叉区间
+       
         child1 = [None] * len(parent1)
         child1[start:end + 1] = parent1[start:end + 1]
 
-        # 从第二个父代中按顺序填充剩余位置
+        
         list1 = []
         for city in parent2:
             if city not in child1 and city in parent1:
@@ -198,15 +196,14 @@ class SolveTSPUsingACO:
                 child1[i] = list1[list1_index]
                 list1_index += 1
 
-        # child1 = order_crossover(parent1, parent2) 调用
-        # 返回子代个体
+       
         return child1
 
-    # 交叉操作(不同维度得到高维)
+    
     def order_crossover_high(self, parent1, parent2):
-        # 创建一个新的列表并复制initial_solution2的值
+        
         new_list = parent2.copy()
-        # 在新列表中进行操作
+       
         list1 = []
         list1_index = 0
         for city in parent2:
@@ -220,15 +217,15 @@ class SolveTSPUsingACO:
             if new_list[i] == None:
                 new_list[i] = child1_son[list2_index]
                 list2_index += 1
-        # 返回新的子列表
+       
         return new_list
 
     def get_distance1_GA(self, route_number):
-        # 读取坐标数据
+        
         with open('eil51-426.txt', 'r') as file:
             cities = [list(map(float, line.split())) for line in file]
 
-        # 计算距离矩阵
+        
         num_cities = len(cities)
         distances = [[0.0] * num_cities for i in range(num_cities)]
         for i in range(num_cities):
@@ -238,24 +235,24 @@ class SolveTSPUsingACO:
                     x2, y2 = cities[j][1], cities[j][2]
                     distances[i][j] = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-        # 计算路线总距离
+        
         total_distance = 0.0
         for i in range(len(route_number) - 1):
             start_city = route_number[i]
             end_city = route_number[i + 1]
             total_distance += distances[start_city][end_city]
 
-        # 添加回到起点的距离
+       
         total_distance += distances[route_number[-1]][route_number[0]]
 
         return total_distance
 
     def get_distance2_GA(self, route_number):
-        # 读取坐标数据
+        
         with open('berlin52-7542.txt', 'r') as file:
             cities = [list(map(float, line.split())) for line in file]
 
-        # 计算距离矩阵
+       
         num_cities = len(cities)
         distances = [[0.0] * num_cities for i in range(num_cities)]
         for i in range(num_cities):
@@ -265,14 +262,14 @@ class SolveTSPUsingACO:
                     x2, y2 = cities[j][1], cities[j][2]
                     distances[i][j] = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-        # 计算路线总距离
+       
         total_distance = 0.0
         for i in range(len(route_number) - 1):
             start_city = route_number[i]
             end_city = route_number[i + 1]
             total_distance += distances[start_city][end_city]
 
-        # 添加回到起点的距离
+       
         total_distance += distances[route_number[-1]][route_number[0]]
 
         return total_distance
@@ -280,22 +277,22 @@ class SolveTSPUsingACO:
     def SA_1(self, initial_solution1, initial_solution2):
         max_iter = 50
         temperature = 100
-        # 初始化当前解和最优解
+        
         current_solution1 = initial_solution1
         best_solution1 = initial_solution1
-        # 开始迭代
+        
         for i in range(max_iter):
-            # 获取当前解的邻域
+            
             neighbor_solution = self.order_crossover_low(initial_solution1, initial_solution2)
-            # 计算当前解和邻域解的目标函数值差
+            
             delta = self.get_distance1_GA(neighbor_solution) - self.get_distance1_GA(current_solution1)
-            # 如果邻域解优于当前解，则接受邻域解
+            
             if delta < 0:
                 current_solution = neighbor_solution
-                # 如果邻域解优于最优解，则更新最优解
+                
                 if self.get_distance1_GA(current_solution1) < self.get_distance1_GA(best_solution1):
                     best_solution1 = current_solution
-            # 否则，按一定概率接受劣解
+           
             else:
                 prob = math.exp(-delta / temperature)
                 if random.random() < prob:
@@ -307,30 +304,30 @@ class SolveTSPUsingACO:
                 if alpha < 0:
                     best_solution1 = neighbor_solution_
             """
-            # 更新温度
+            
             temperature *= 0.99
-        #print("SA1", best_solution1)
+       
         return best_solution1
 
     def SA_2(self, initial_solution1, initial_solution2):
-        max_iter = 50
+        max_iter = 100
         temperature = 100
-        # 初始化当前解和最优解
+       
         current_solution2 = initial_solution2
         best_solution2 = initial_solution2
-        # 开始迭代
+       
         for i in range(max_iter):
-            # 获取当前解的邻域
+           
             neighbor_solution = self.order_crossover_high(initial_solution1, initial_solution2)
-            # 计算当前解和邻域解的目标函数值差
+            
             delta = self.get_distance2_GA(neighbor_solution) - self.get_distance2_GA(current_solution2)
-            # 如果邻域解优于当前解，则接受邻域解
+            
             if delta < 0:
                 current_solution = neighbor_solution
-                # 如果邻域解优于最优解，则更新最优解
+                
                 if self.get_distance2_GA(current_solution2) < self.get_distance2_GA(best_solution2):
                     best_solution2 = current_solution
-            # 否则，按一定概率接受劣解
+            
             else:
                 prob = math.exp(-delta / temperature)
                 if random.random() < prob:
@@ -342,9 +339,9 @@ class SolveTSPUsingACO:
                 if alpha < 0:
                     best_solution2 = neighbor_solution_
             """
-            # 更新温度
+           
             temperature *= 0.99
-        #print("SA2", best_solution2)
+        
         return best_solution2
 
     def _ACGA(self):
@@ -355,9 +352,9 @@ class SolveTSPUsingACO:
         for step in range(self.steps):
             if self.global_best_distance2 <= 7544.5:
                 break
-            tour1_list = []  # 存路线列表
+            tour1_list = []  
             tour2_list = []
-            ant1_distance_list = []  # 存适应度值列表
+            ant1_distance_list = []  
             ant2_distance_list = []
             iteration_best_tour1 = None
             iteration_best_distance1 = float("inf")
@@ -370,31 +367,31 @@ class SolveTSPUsingACO:
                 tour1_list.append(ant1.tour1)
                 ant1_distance_list.append(ant1.distance)
                 # print(ant1.tour1)
-                if ant1.get_distance1() < iteration_best_distance1:  # 这一代每个蚂蚁比较出最小的
+                if ant1.get_distance1() < iteration_best_distance1: 
                     iteration_best_tour1 = ant1.tour1
                     iteration_best_distance1 = ant1.distance
-            variance1 = np.var(ant1_distance_list)  # 计算标准差
+            variance1 = np.var(ant1_distance_list)  
             variance1_list.append(variance1)
             for ant2 in self.ants2:
                 ant2.find_tour2()
                 tour2_list.append(ant2.tour2)
                 ant2_distance_list.append(ant2.distance)
-                # print(tour2_list)
-                if ant2.get_distance2() < iteration_best_distance2:  # 这一代每个蚂蚁比较出最小的
+               
+                if ant2.get_distance2() < iteration_best_distance2: 
                     iteration_best_tour2 = ant2.tour2
                     iteration_best_distance2 = ant2.distance
-            variance2 = np.var(ant2_distance_list)  # 计算标准差
+            variance2 = np.var(ant2_distance_list)  
             variance2_list.append(variance2)
             # print(sum(variance1_list) / len(variance1_list), sum(variance2_list) / len(variance2_list))
-            # 模拟退火交互
+           
             if float(step + 1) / float(self.steps) <= 0.5:
             #if sum(variance1_list) / len(variance1_list) > 2100 or step == 0:
                 self._add_pheromone1(iteration_best_tour1, iteration_best_distance1)
-                max_pheromone1 = self.pheromone_deposit_weight1 / iteration_best_distance1  # 信息素最大值上限
+                max_pheromone1 = self.pheromone_deposit_weight1 / iteration_best_distance1  
             else:
-                # SGA退火交互
+               
                 """
-                for i in range(_colony_size1): #全部都退火
+                for i in range(_colony_size1): 
                     child1 = self.SA_1(tour1_list[i], tour2_list[i])
                     child1_distance = self.get_distance1_GA(child1)
                     if child1_distance <= iteration_best_distance1:
@@ -403,23 +400,23 @@ class SolveTSPUsingACO:
                         # print("1交互")
                 """
                 if variance1 <= sum(variance1_list) / len(variance1_list):
-                    # 只对最优蚂蚁退火
+                   
                     child1 = self.SA_1(iteration_best_tour1, iteration_best_tour2)
                     child1_distance = self.get_distance1_GA(child1)
                     if child1_distance <= iteration_best_distance1:
                         iteration_best_distance1 = child1_distance
                         iteration_best_tour1 = child1
-                        # print("1交互")
+                       
 
                     if iteration_best_distance1 < self.global_best_distance1:
                         self.global_best_tour1 = iteration_best_tour1
                         self.global_best_distance1 = iteration_best_distance1
                 else:
                     self._add_pheromone1(iteration_best_tour1, iteration_best_distance1)
-                    max_pheromone1 = self.pheromone_deposit_weight1 / iteration_best_distance1  # 信息素最大值上限
+                    max_pheromone1 = self.pheromone_deposit_weight1 / iteration_best_distance1  
                 self._add_pheromone1(self.global_best_tour1, self.global_best_distance1)
-                max_pheromone1 = self.pheromone_deposit_weight1 / self.global_best_distance1  # 信息素最大值上限
-            min_pheromone1 = max_pheromone1 * self.min_scaling_factor1  # 信息素最小值下限
+                max_pheromone1 = self.pheromone_deposit_weight1 / self.global_best_distance1  
+            min_pheromone1 = max_pheromone1 * self.min_scaling_factor1 
             for i in range(self.num_nodes1):
                 for j in range(i + 1, self.num_nodes1):
                     self.edges1[i][j].pheromone1 *= (1.0 - self.rho1)
@@ -431,7 +428,7 @@ class SolveTSPUsingACO:
             if float(step + 1) / float(self.steps) <= 0.5:
             #if sum(variance2_list) / len(variance2_list) > 2800 or step == 0:
                 self._add_pheromone2(iteration_best_tour2, iteration_best_distance2)
-                max_pheromone2 = self.pheromone_deposit_weight2 / iteration_best_distance2  # 信息素最大值上限
+                max_pheromone2 = self.pheromone_deposit_weight2 / iteration_best_distance2  
             else:
                 # SGA退火交互
                 '''
@@ -454,11 +451,11 @@ class SolveTSPUsingACO:
                         self.global_best_tour2 = iteration_best_tour2
                         self.global_best_distance2 = iteration_best_distance2
                     self._add_pheromone2(self.global_best_tour2, self.global_best_distance2)
-                    max_pheromone2 = self.pheromone_deposit_weight2 / self.global_best_distance2  # 信息素最大值上限
+                    max_pheromone2 = self.pheromone_deposit_weight2 / self.global_best_distance2  
                 else:
                     self._add_pheromone2(iteration_best_tour2, iteration_best_distance2)
-                    max_pheromone2 = self.pheromone_deposit_weight2 / iteration_best_distance2  # 信息素最大值上限
-            min_pheromone2 = max_pheromone2 * self.min_scaling_factor2  # 信息素最小值下限
+                    max_pheromone2 = self.pheromone_deposit_weight2 / iteration_best_distance2  
+            min_pheromone2 = max_pheromone2 * self.min_scaling_factor2 
             for i in range(self.num_nodes2):
                 for j in range(i + 1, self.num_nodes2):
                     self.edges2[i][j].pheromone2 *= (1.0 - self.rho2)
@@ -519,11 +516,10 @@ if __name__ == '__main__':
     ACGA = SolveTSPUsingACO(colony_size1=_colony_size1, steps=_steps, nodes1=_nodes1, colony_size2=_colony_size2, nodes2=_nodes2)
     ACGA.run()
 
-# 记录结束时间
+
 end_time = time.time()
 
-# 计算运行时间
 elapsed_time = end_time - start_time
 
-# 输出运行时间
+
 print(f"代码运行时间: {elapsed_time} 秒")
